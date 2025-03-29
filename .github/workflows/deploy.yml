@@ -97,6 +97,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             mkdir -p /dockerProjects/chibbotec/auth_service
-            curl -o /dockerProjects/chibbotec/auth_service/zero_downtime_deploy.py https://raw.githubusercontent.com/Here-is-chibbotec/auth_service/main/infraScript/zero_downtime_deploy.py
+            curl -o /dockerProjects/chibbotec/auth_service/zero_downtime_deploy.py https://raw.githubusercontent.com/chibbotec/auth_service/main/infraScript/zero_downtime_deploy.py
             chmod +x /dockerProjects/chibbotec/auth_service/zero_downtime_deploy.py
             python3 /dockerProjects/chibbotec/auth_service/zero_downtime_deploy.py
