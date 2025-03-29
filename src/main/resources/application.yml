@@ -1,0 +1,20 @@
+spring:
+  profiles:
+    active: dev
+    include: secret
+  logging:
+    level:
+      com.ll.chatApp: DEBUG
+      org.hibernate.orm.jdbc.bind: TRACE
+      org.hibernate.orm.jdbc.extract: TRACE
+      org.springframework.transaction.interceptor: TRACE
+custom:
+  dev:
+    cookieDomain: localhost
+    frontUrl: "http://${custom.dev.cookieDomain}:5173"
+    backUrl: "http://${custom.dev.cookieDomain}:${server.port}"
+  site:
+    name: "chibbotech"
+    cookieDomain: "${custom.dev.cookieDomain}"
+    frontUrl: "${custom.dev.frontUrl}"
+    backUrl: "${custom.dev.backUrl}"

@@ -1,0 +1,30 @@
+server:
+  port: 9010
+spring:
+  output:
+    ansi:
+      enabled: always
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+#        show_sql: true
+#        format_sql: true
+#        use_sql_comments: true
+        default_batch_fetch_size: 100
+services:
+  auth:
+    url: http://210.113.34.187:9010 # 인증 서비스 URL
+  member:
+    url: http://210.113.34.187:9020  # 회원 서비스 URL
+custom:
+  prod:
+    cookieDomain: pawpaw.kknaks.site
+    frontUrl: "https://www.${custom.prod.cookieDomain}"
+    backUrl: "https://api.${custom.prod.cookieDomain}"
+  site:
+    name: "chibbotech"
+    cookieDomain: "${custom.prod.cookieDomain}"
+    frontUrl: "${custom.prod.frontUrl}"
+    backUrl: "${custom.prod.backUrl}"
