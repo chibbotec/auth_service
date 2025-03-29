@@ -15,9 +15,9 @@ spring:
         default_batch_fetch_size: 100
 services:
   auth:
-    url: http://210.113.34.187:9010 # 인증 서비스 URL
+    url: http://172.30.1.23:9010 # 인증 서비스 URL
   member:
-    url: http://210.113.34.187:9020  # 회원 서비스 URL
+    url: http://172.30.1.23:9020  # 회원 서비스 URL
 custom:
   prod:
     cookieDomain: pawpaw.kknaks.site
