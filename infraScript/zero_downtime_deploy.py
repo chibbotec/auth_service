@@ -9,12 +9,12 @@ from typing import Dict, Optional
 
 class ServiceManager:
     # 초기화 함수
-    def __init__(self, socat_port: int = 9020, sleep_duration: int = 3) -> None:
+    def __init__(self, socat_port: int = 9010, sleep_duration: int = 3) -> None:
         self.socat_port: int = socat_port
         self.sleep_duration: int = sleep_duration
         self.services: Dict[str, int] = {
-            'member_service_1': 9021,
-            'member_service_2': 9022
+            'auth_service_1': 9011,
+            'auth_service_2': 9012
         }
         self.current_name: Optional[str] = None
         self.current_port: Optional[int] = None
@@ -26,7 +26,7 @@ class ServiceManager:
         cmd: str = f"ps aux | grep 'socat -t0 TCP-LISTEN:{self.socat_port}' | grep -v grep | awk '{{print $NF}}'"
         current_service: str = subprocess.getoutput(cmd)
         if not current_service:
-            self.current_name, self.current_port = 'member_service_2', self.services['member_service_2']
+            self.current_name, self.current_port = 'auth_service_2', self.services['auth_service_2']
         else:
             self.current_port = int(current_service.split(':')[-1])
             self.current_name = next((name for name, port in self.services.items() if port == self.current_port), None)
@@ -52,7 +52,7 @@ class ServiceManager:
         # 특정 이미지 중 <none> 태그가 된 이미지만 정리
 
         # 먼저 이미지 목록 확인
-        cmd_list = "docker images | grep '.*/chibbotec/member_service' | grep '<none>'"
+        cmd_list = "docker images | grep '.*/chibbotec/auth_service' | grep '<none>'"
         images = self._run_command(cmd_list)
 
         if not images:
@@ -60,7 +60,7 @@ class ServiceManager:
             return
 
         # 이미지 정리
-        cmd_remove = "docker images | grep '.*/chibbotec/member_service' | grep '<none>' | awk '{print $3}' | xargs -r docker rmi"
+        cmd_remove = "docker images | grep '.*/chibbotec/auth_service' | grep '<none>' | awk '{print $3}' | xargs -r docker rmi"
         output = self._run_command(cmd_remove)
         print("이미지 정리 완료")
 
@@ -72,7 +72,7 @@ class ServiceManager:
     # Docker 컨테이너를 실행하는 함수
     def _run_container(self, name: str, port: int) -> None:
         os.system(
-            f"docker run -d --name={name} --restart unless-stopped -p {port}:9020 -e TZ=Asia/Seoul -v /dockerProjects/chibbotec/member_service/volumes/gen:/gen --pull always ghcr.io/chibbotec/member_service")
+            f"docker run -d --name={name} --restart unless-stopped -p {port}:9010 -e TZ=Asia/Seoul -v /dockerProjects/chibbotec/auth_service/volumes/gen:/gen --pull always ghcr.io/chibbotec/auth_service")
     ##
     def _switch_port(self) -> None:
         # Socat 포트를 전환하는 함수
