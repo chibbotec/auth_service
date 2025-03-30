@@ -20,7 +20,7 @@ services:
     url: http://172.30.1.23:9020  # 회원 서비스 URL
 custom:
   prod:
-    cookieDomain: pawpaw.kknaks.site
+    cookieDomain: chibbotec.kknaks.site
     frontUrl: "https://www.${custom.prod.cookieDomain}"
     backUrl: "https://api.${custom.prod.cookieDomain}"
   site:
