@@ -37,10 +37,11 @@ public class CustomOAuth2AuthenticationSuccessHandler extends SavedRequestAwareA
         } catch (Exception e) {
             // 사용자가 없으면 새로 생성
             log.info("새 소셜 로그인 사용자 생성: {}", securityUser.getUsername());
+
             user = User.builder()
                 .username(securityUser.getUsername())
                 .password("") // 소셜 로그인 사용자는 비밀번호 불필요
-                .nickname(securityUser.getUsername())
+                .nickname(securityUser.getNickname())
                 .email(securityUser.getEmail())
                 .build();
             user = authService.saveUser(user);

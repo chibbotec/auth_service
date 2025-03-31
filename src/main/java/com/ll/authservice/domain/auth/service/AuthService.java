@@ -146,11 +146,11 @@ public class AuthService {
 
     User savedUser = userRepository.save(user);
 
-
-
     MemberProfileRequest profileRequest = MemberProfileRequest.builder()
         .id(savedUser.getId())
         .username(savedUser.getUsername())
+        .email(savedUser.getEmail())
+        .nickname(savedUser.getNickname())
         .build();
     kafkaTemplate.send(Topics.SIGNUP.getTopicName(), profileRequest);
     return savedUser;

@@ -23,13 +23,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         .getClientRegistration()
         .getRegistrationId()
         .toUpperCase(Locale.getDefault());
+
+    // 요청 스코프 정보 출력
+    log.debug("OAuth2 요청 스코프: {}", userRequest.getClientRegistration().getScopes());
+
     Map<String, Object> attributes = oAuth2User.getAttributes();
 
     // 디버그용 로그
     log.debug("OAuth2 사용자 정보: {}", attributes);
 
     // GitHub 사용자 정보 추출
-    String nickname = (String) attributes.get("name"); // 사용자가 설정한 이름
+    String nickname = (String) attributes.get("nickname"); // 사용자가 설정한 이름
     if (nickname == null || nickname.isEmpty()) {
       nickname = (String) attributes.get("login"); // 이름이 없으면 로그인 아이디 사용
     }

@@ -12,7 +12,7 @@ custom:
   dev:
     cookieDomain: localhost
     frontUrl: "http://${custom.dev.cookieDomain}:5173"
-    backUrl: "http://${custom.dev.cookieDomain}:${server.port}"
+    backUrl: "http://${custom.dev.cookieDomain}:9000"
   site:
     name: "chibbotech"
     cookieDomain: "${custom.dev.cookieDomain}"

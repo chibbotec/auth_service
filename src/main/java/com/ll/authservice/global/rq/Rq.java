@@ -24,25 +24,6 @@ public class Rq {
     private final HttpServletRequest req;
     private final HttpServletResponse resp;
     private final JwtProvider jwtProvider;
-//    private final AuthService authService;
-
-//    public void setLogin(Member member) {
-//        UserDetails user = new SecurityUser(
-//                member.getId(),
-//                member.getUsername(),
-//                "",
-//                member.getNickname(),
-//                member.getAuthorities()
-//        );
-//
-//        Authentication authentication = new UsernamePasswordAuthenticationToken(
-//                user,
-//                user.getPassword(),
-//                user.getAuthorities()
-//        );
-//
-//        SecurityContextHolder.getContext().setAuthentication(authentication);
-//    }
 
     public User getActor() {
         return Optional.ofNullable(
@@ -57,23 +38,11 @@ public class Rq {
                 .orElse(null);
     }
 
-//    public void setCookie(String name, String value) {
-//        ResponseCookie cookie = ResponseCookie.from(name, value)
-//                .path("/")
-//                .domain(AppConfig.getSiteBackUrl())
-//                .sameSite("Strict")
-//                .secure(true)
-//                .httpOnly(true)
-////                .httpOnly(false)
-//                .build();
-//        resp.addHeader("Set-Cookie", cookie.toString());
-//    }
-
     public void setCookie(String name, String value, int maxAgeInSeconds) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
             .path("/")
             .domain(AppConfig.getSiteBackUrl())
-            .sameSite("Strict")
+            .sameSite("None")
             .secure(true)
             .httpOnly(true)
             .maxAge(maxAgeInSeconds)
@@ -81,66 +50,40 @@ public class Rq {
         resp.addHeader("Set-Cookie", cookie.toString());
     }
 
-//    public String getCookieValue(String name) {
-//        return Optional
-//                .ofNullable(req.getCookies())
-//                .stream() // 1 ~ 0
-//                .flatMap(cookies -> Arrays.stream(cookies))
-//                .filter(cookie -> cookie.getName().equals(name))
-//                .map(cookie -> cookie.getValue())
-//                .findFirst()
-//                .orElse(null);
-//    }
-//
-//    public void deleteCookie(String name) {
-//        ResponseCookie cookie = ResponseCookie.from(name, null)
-//                .path("/")
-//                .domain(AppConfig.getSiteBackUrl())
-//                .sameSite("Strict")
-//                .secure(true)
-//                .httpOnly(true)
-//                .maxAge(0)
-//                .build();
-//
-//        resp.addHeader("Set-Cookie", cookie.toString());
-//    }
-
     public void setHeader(String name, String value) {
         resp.setHeader(name, value);
     }
 
-//    public String getHeader(String name) {
-//        return req.getHeader(name);
-//    }
-//
-//    public void refreshAccessToken(Member member) {
-//        String newAccessToken = memberService.genAccessToken(member);
-//
-//        setHeader("Authorization", "Bearer " + member.getApiKey() + " " + newAccessToken);
-//        setCookie("accessToken", newAccessToken);
-//    }
-
-    // OAuth2 인증 성공 후 토큰 쿠키 설정 메서드 수정
-    public TokenResponse makeAuthCookies(User user) {
-        // JwtProvider를 통해 액세스 토큰과 리프레시 토큰 생성
-        String accessToken = jwtProvider.genAccessToken(user);
-        String refreshToken = user.getRefreshToken();
-
-        // 토큰 만료 시간 가져오기
+    // 토큰 쿠키 설정 (로그인, 리프레시 등)
+    public TokenResponse setAuthCookies(User user, String accessToken, String refreshToken) {
         int accessTokenExpirationTime = jwtProvider.getAccessTokenExpirationTime();
         int refreshTokenExpirationTime = jwtProvider.getRefreshTokenExpirationTime();
 
         // 액세스 토큰 쿠키 설정
         setCookie("accessToken", accessToken, accessTokenExpirationTime);
 
-        // 리프레시 토큰 쿠키 설정 (7일)
+        // 리프레시 토큰 쿠키 설정
         setCookie("refreshToken", refreshToken, refreshTokenExpirationTime);
 
-        // TokenResponse 객체 생성하여 반환
         return TokenResponse.builder()
+            .username(user.getUsername())
             .accessToken(accessToken)
             .refreshToken(refreshToken)
             .accessTokenExpirationTime(accessTokenExpirationTime)
             .build();
+    }
+
+    // OAuth2 인증용 메서드 (토큰 생성 + 쿠키 설정)
+    public TokenResponse makeAuthCookies(User user) {
+        String accessToken = jwtProvider.genAccessToken(user);
+        String refreshToken = user.getRefreshToken();
+
+        return setAuthCookies(user, accessToken, refreshToken);
+    }
+
+    // 토큰 쿠키 삭제 (로그아웃)
+    public void removeAuthCookies() {
+        setCookie("accessToken", null, 0);
+        setCookie("refreshToken", null, 0);
     }
 }

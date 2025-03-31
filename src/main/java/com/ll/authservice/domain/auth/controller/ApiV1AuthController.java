@@ -47,8 +47,12 @@ public class ApiV1AuthController {
 
     TokenResponse tokenResponse = authService.login(loginRequest);
 
-    // 쿠키에 토큰 설정
-    addTokenCookies(response, tokenResponse);
+    // Rq 클래스를 통해 쿠키 설정
+    rq.setAuthCookies(
+        authService.findByUsername(tokenResponse.getUsername()),
+        tokenResponse.getAccessToken(),
+        tokenResponse.getRefreshToken()
+    );
 
     return ResponseEntity.ok(tokenResponse);
   }
@@ -72,7 +76,12 @@ public class ApiV1AuthController {
     TokenResponse tokenResponse = authService.refreshToken(refreshToken);
 
     // 쿠키에 새 토큰 설정
-    addTokenCookies(response, tokenResponse);
+    rq.setAuthCookies(
+        authService.findByUsername(tokenResponse.getUsername()),
+        tokenResponse.getAccessToken(),
+        tokenResponse.getRefreshToken()
+    );
+
 
     return ResponseEntity.ok(tokenResponse);
   }
@@ -87,7 +96,7 @@ public class ApiV1AuthController {
     }
 
     // 토큰 쿠키 삭제
-    removeTokenCookies(response);
+    rq.removeAuthCookies();
 
     return ResponseEntity.ok().build();
   }

@@ -13,6 +13,15 @@ spring:
 #        format_sql: true
 #        use_sql_comments: true
         default_batch_fetch_size: 100
+  kafka:
+    bootstrap-servers: 172.30.1.23:19092,172.30.1.23:29092,172.30.1.23:39092
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.ll.hereispaw.domain.noti.dto.kafka
+        spring.json.use.type.headers: false
 services:
   auth:
     url: http://172.30.1.23:9010 # 인증 서비스 URL
