@@ -15,7 +15,7 @@ spring:
         default_batch_fetch_size: 100
   kafka:
     #    bootstrap-servers: 210.113.34.187:19092,210.113.34.187:29092,210.113.34.187:39092
-    bootstrap-servers: localhost:19092
+    bootstrap-servers: host.docker.internal:19092
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
@@ -25,6 +25,6 @@ spring:
         spring.json.use.type.headers: false
 services:
   auth:
-    url: http://localhost:9010 # 인증 서비스 URL
+    url: http://host.docker.internal:9010 # 인증 서비스 URL
   member:
-    url: http://localhost:9020  # 회원 서비스 URL
+    url: http://host.docker.internal:9020  # 회원 서비스 URL

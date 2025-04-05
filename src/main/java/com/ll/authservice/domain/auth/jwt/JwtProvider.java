@@ -10,6 +10,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +51,7 @@ public class JwtProvider {
     Map<String, Object> claims = new HashMap<>();
     claims.put("id", user.getId());
     claims.put("username", user.getUsername());
+    claims.put("sessionId", UUID.randomUUID().toString()); // 고유 세션 ID 추가
 
     Date now = new Date();
     Date expiryDate = new Date(now.getTime() + 1000L * expirationSeconds);
