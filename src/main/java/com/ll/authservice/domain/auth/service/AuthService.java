@@ -12,6 +12,7 @@ import com.ll.authservice.global.error.ErrorCode;
 import com.ll.authservice.global.exception.CustomException;
 import com.ll.authservice.global.kafka.MemberProfileRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
   private final UserRepository userRepository;
@@ -137,6 +139,7 @@ public class AuthService {
     return userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
   }
 
+  @Transactional
   public User saveUser(User user) {
 
     String refreshToken = jwtProvider.genRefreshToken(user);
@@ -154,5 +157,12 @@ public class AuthService {
         .build();
     kafkaTemplate.send(Topics.SIGNUP.getTopicName(), profileRequest);
     return savedUser;
+  }
+
+  @Transactional
+  public User updateRefreshToken(User user){
+    User findedUser = userRepository.findById(user.getId()).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+    findedUser.setRefreshToken(user.getRefreshToken());
+    return userRepository.save(findedUser);
   }
 }

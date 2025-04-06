@@ -3,6 +3,7 @@ package com.ll.authservice.global.rq;
 import com.ll.authservice.domain.auth.dto.TokenResponse;
 import com.ll.authservice.domain.auth.entity.User;
 import com.ll.authservice.domain.auth.jwt.JwtProvider;
+import com.ll.authservice.domain.auth.service.AuthService;
 import com.ll.authservice.global.config.AppConfig;
 import com.ll.authservice.global.security.SecurityUser;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ public class Rq {
     private final HttpServletRequest req;
     private final HttpServletResponse resp;
     private final JwtProvider jwtProvider;
+    private final AuthService authService;
 
     public User getActor() {
         return Optional.ofNullable(
@@ -76,7 +78,12 @@ public class Rq {
     // OAuth2 인증용 메서드 (토큰 생성 + 쿠키 설정)
     public TokenResponse makeAuthCookies(User user) {
         String accessToken = jwtProvider.genAccessToken(user);
-        String refreshToken = user.getRefreshToken();
+        String refreshToken = jwtProvider.genRefreshToken(user);
+
+        // 데이터베이스에 리프레시 토큰 저장
+        user.setRefreshToken(refreshToken);
+
+        authService.updateRefreshToken(user);
 
         return setAuthCookies(user, accessToken, refreshToken);
     }
