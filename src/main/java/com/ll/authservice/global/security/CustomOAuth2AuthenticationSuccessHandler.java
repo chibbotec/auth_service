@@ -1,14 +1,16 @@
 package com.ll.authservice.global.security;
 
-
 import com.ll.authservice.domain.auth.entity.User;
 import com.ll.authservice.domain.auth.service.AuthService;
+import com.ll.authservice.global.enums.Topics;
+import com.ll.authservice.global.kafka.GitHubLoginEvent;
 import com.ll.authservice.global.rq.Rq;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Component;
 public class CustomOAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
     private final AuthService authService;
     private final Rq rq;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @SneakyThrows
     @Override
@@ -34,8 +37,10 @@ public class CustomOAuth2AuthenticationSuccessHandler extends SavedRequestAwareA
         try {
             // 기존 사용자 검색 (username으로)
             user = authService.findByUsername(securityUser.getUsername());
+            // 기존 사용자의 기본 정보만 업데이트 (필요한 경우)
+            // GitHub 관련 정보는 업데이트하지 않음
         } catch (Exception e) {
-            // 사용자가 없으면 새로 생성
+            // 사용자가 없으면 새로 생성 (기본 정보만)
             log.info("새 소셜 로그인 사용자 생성: {}", securityUser.getUsername());
 
             user = User.builder()
@@ -44,22 +49,37 @@ public class CustomOAuth2AuthenticationSuccessHandler extends SavedRequestAwareA
                 .nickname(securityUser.getNickname())
                 .email(securityUser.getEmail())
                 .build();
-            user = authService.saveUser(user);
-
         }
+
+        // 사용자 저장 (GitHub 정보 없이)
+        user = authService.saveUser(user);
 
         log.info("사용자 정보: {}", user.getUsername());
 
         // Rq 유틸리티를 사용하여 토큰 쿠키 설정
-        rq.makeAuthCookies(user);
+        var tokenResponse = rq.makeAuthCookies(user);
+
+        // GitHub 정보가 있으면 Kafka로 전송
+        if (securityUser.getGithubUsername() != null) {
+            // GitHub 로그인 이벤트를 Kafka로 전파
+            GitHubLoginEvent githubLoginEvent = GitHubLoginEvent.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .githubUsername(securityUser.getGithubUsername())
+                .githubAccessToken(securityUser.getGithubAccessToken())
+//                .githubTokenExpires(LocalDateTime.now().plusHours(1)) // 토큰 만료 시간 설정 (예: 1시간)
+                .githubScopes(securityUser.getGithubScopes())
+                .build();
+
+            // Kafka로 이벤트 전송
+            kafkaTemplate.send(Topics.GITHUB_LOGIN.getTopicName(), githubLoginEvent);
+            log.info("GitHub 로그인 이벤트 전송 완료: {}", user.getUsername());
+        }
 
         // 리다이렉트 URL 설정 (state 파라미터에서 가져옴)
         String redirectUrl = request.getParameter("state");
-
-//        // 리다이렉트 URL이 없는 경우 기본 URL로 설정
-//        if (redirectUrl == null || redirectUrl.isEmpty()) {
-//            redirectUrl = "/"; // 기본 URL
-//        }
 
         // 리다이렉트 수행
         response.sendRedirect(redirectUrl);

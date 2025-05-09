@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum Topics {
-  SIGNUP("signup");
+  SIGNUP("signup"),
+  GITHUB_LOGIN("github_login");
 
   // Getter 메서드
   private final String topicName;

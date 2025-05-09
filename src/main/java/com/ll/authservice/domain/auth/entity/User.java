@@ -38,6 +38,7 @@ public class User {
   @Column(nullable = false)
   private String password;
 
+  @Column(length = 512)
   private String refreshToken;
 
   @CreatedDate
