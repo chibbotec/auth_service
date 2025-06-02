@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: auth
   profiles:
     active: dev
     include: secret
@@ -26,3 +28,15 @@ management:
   endpoint:
     health:
       show-details: always
+  info:
+    env:
+      enabled: true
+  # 새로운 Prometheus 설정
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  # 새로운 태그 설정
+  observations:
+    tags:
+      application: ${spring.application.name}
