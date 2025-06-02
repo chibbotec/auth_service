@@ -46,6 +46,13 @@ dependencies {
     //actuator 설정
     implementation ("org.springframework.boot:spring-boot-starter-actuator")
 
+    // Spring Boot Admin 클라이언트 의존성
+    implementation ("de.codecentric:spring-boot-admin-starter-client:3.1.7")
+
+    // 모니터링 도구들
+    implementation ("io.micrometer:micrometer-registry-prometheus")
+
+
 
 }
 
