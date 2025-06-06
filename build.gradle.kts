@@ -55,9 +55,6 @@ dependencies {
     // Zipkin 분산 추적을 위한 의존성 (Spring Boot 3.x)
     implementation("io.micrometer:micrometer-tracing-bridge-otel")
     implementation("io.opentelemetry:opentelemetry-exporter-zipkin")
-
-
-
 }
 
 

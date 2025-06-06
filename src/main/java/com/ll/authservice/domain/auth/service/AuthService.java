@@ -13,6 +13,7 @@ import com.ll.authservice.global.exception.CustomException;
 import com.ll.authservice.global.kafka.MemberProfileRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,9 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final JwtProvider jwtProvider;
   private final KafkaTemplate<String, Object> kafkaTemplate;
+
+  @Value("${auth.test-mode:false}")
+  private boolean testMode;
 
   @Transactional
   public UserResponse signup(SignupRequest request) {
@@ -101,6 +105,17 @@ public class AuthService {
 
     // 새 액세스 토큰 생성
     String newAccessToken = jwtProvider.genAccessToken(user);
+
+    // 🔥 핵심: 테스트 모드에서는 refresh token 갱신 안함
+    if (testMode) {
+      log.info("Test mode: refresh token reused for {}", user.getUsername());
+      return TokenResponse.builder()
+          .username(user.getUsername())
+          .accessToken(newAccessToken)
+          .refreshToken(refreshToken)  // 기존 토큰 그대로 반환
+          .accessTokenExpirationTime(jwtProvider.getAccessTokenExpirationTime())
+          .build();
+    }
 
     // 새 리프레시 토큰 생성 (선택적 - 보안 강화를 위해 리프레시 토큰도 갱신할 수 있음)
     String newRefreshToken = jwtProvider.genRefreshToken(user);

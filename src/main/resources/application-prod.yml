@@ -34,3 +34,9 @@ custom:
     cookieDomain: "${custom.prod.cookieDomain}"
     frontUrl: "${custom.prod.frontUrl}"
     backUrl: "${custom.prod.backUrl}"
+
+# application-prod.yml (운영 환경)
+auth:
+  test-mode: false
+  refresh-token:
+    rotate: true   # 운영에서는 반드시 갱신
