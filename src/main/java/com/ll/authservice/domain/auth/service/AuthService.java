@@ -170,7 +170,7 @@ public class AuthService {
         .email(savedUser.getEmail())
         .nickname(savedUser.getNickname())
         .build();
-    kafkaTemplate.send(Topics.SIGNUP.getTopicName(), profileRequest);
+//    kafkaTemplate.send(Topics.SIGNUP.getTopicName(), profileRequest);
     return savedUser;
   }
 
